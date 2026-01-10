@@ -13,10 +13,41 @@ const progressBarElement = document.getElementById('progress-bar');
 const questionVisualElement = document.getElementById('question-visual');
 const resultTitleElement = document.getElementById('result-title');
 const resultTraitsElement = document.getElementById('result-traits');
+const weatherStatusElement = document.getElementById('weather-status');
+const weatherTempElement = document.getElementById('weather-temp');
+const weatherSummaryElement = document.getElementById('weather-summary');
+const weatherFeelsElement = document.getElementById('weather-feels');
+const weatherHumidityElement = document.getElementById('weather-humidity');
+const weatherWindElement = document.getElementById('weather-wind');
+const weatherRefreshButton = document.getElementById('weather-refresh');
 
 let shuffledQuestions, currentQuestionIndex;
 let score = 0;
 let resultScores = {};
+
+const weatherCodeMap = {
+    0: '맑음',
+    1: '대체로 맑음',
+    2: '부분적으로 흐림',
+    3: '흐림',
+    45: '안개',
+    48: '착빙 안개',
+    51: '이슬비',
+    53: '약한 이슬비',
+    55: '강한 이슬비',
+    61: '약한 비',
+    63: '비',
+    65: '강한 비',
+    71: '약한 눈',
+    73: '눈',
+    75: '강한 눈',
+    80: '약한 소나기',
+    81: '소나기',
+    82: '강한 소나기',
+    95: '뇌우',
+    96: '뇌우/우박',
+    99: '강한 뇌우/우박'
+};
 
 const questions = [
     {
@@ -147,6 +178,11 @@ nextButton.addEventListener('click', () => {
     setNextQuestion();
 });
 restartButton.addEventListener('click', startGame);
+weatherRefreshButton.addEventListener('click', () => {
+    fetchWeather();
+});
+
+fetchWeather();
 
 function startGame() {
     score = 0;
@@ -269,6 +305,57 @@ function getResultType() {
         }
     };
     return catalog[top] || catalog.calm;
+}
+
+function fetchWeather() {
+    if (!navigator.geolocation) {
+        weatherStatusElement.innerText = '브라우저에서 위치 정보를 지원하지 않습니다.';
+        return;
+    }
+    weatherStatusElement.innerText = '현재 위치에서 날씨를 가져오는 중...';
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const { latitude, longitude } = position.coords;
+            loadWeather(latitude, longitude);
+        },
+        () => {
+            weatherStatusElement.innerText = '위치 권한이 필요합니다.';
+        },
+        { timeout: 8000 }
+    );
+}
+
+function loadWeather(latitude, longitude) {
+    const params = new URLSearchParams({
+        latitude: latitude.toFixed(4),
+        longitude: longitude.toFixed(4),
+        current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m',
+        timezone: 'auto'
+    });
+    const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+
+    fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+            if (!data?.current) {
+                throw new Error('no-data');
+            }
+            const current = data.current;
+            const temp = Math.round(current.temperature_2m);
+            const feels = Math.round(current.apparent_temperature);
+            const humidity = Math.round(current.relative_humidity_2m);
+            const wind = Math.round(current.wind_speed_10m);
+            const summary = weatherCodeMap[current.weather_code] || '날씨 정보';
+            weatherStatusElement.innerText = '현재 날씨';
+            weatherTempElement.innerText = `${temp}°`;
+            weatherSummaryElement.innerText = summary;
+            weatherFeelsElement.innerText = `${feels}°`;
+            weatherHumidityElement.innerText = `${humidity}%`;
+            weatherWindElement.innerText = `${wind} m/s`;
+        })
+        .catch(() => {
+            weatherStatusElement.innerText = '날씨 정보를 불러오지 못했습니다.';
+        });
 }
 
 function buildVisual(config) {

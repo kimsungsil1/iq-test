@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>한국어 IQ 검사</title>
+    <title>마음 온도 심리 테스트</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,6 +19,38 @@
             <h1>마음 온도 심리 테스트</h1>
             <p class="subhead">감정의 온도와 에너지를 가볍게 체크해 보는 감성 심리 테스트입니다.</p>
         </header>
+
+        <section class="panel weather-panel" aria-live="polite">
+            <div class="weather-header">
+                <div>
+                    <p class="meta">오늘의 날씨</p>
+                    <h2>내 주변 날씨 브리핑</h2>
+                </div>
+                <button id="weather-refresh" class="ghost-btn">새로고침</button>
+            </div>
+            <div class="weather-body">
+                <div class="weather-main">
+                    <p id="weather-status" class="weather-status">위치 정보를 가져오는 중...</p>
+                    <p id="weather-temp" class="weather-temp">--°</p>
+                    <p id="weather-summary" class="weather-summary"></p>
+                </div>
+                <div class="weather-details">
+                    <div>
+                        <p class="weather-label">체감</p>
+                        <p id="weather-feels">--°</p>
+                    </div>
+                    <div>
+                        <p class="weather-label">습도</p>
+                        <p id="weather-humidity">--%</p>
+                    </div>
+                    <div>
+                        <p class="weather-label">바람</p>
+                        <p id="weather-wind">-- m/s</p>
+                    </div>
+                </div>
+            </div>
+            <p class="weather-note">Open-Meteo 무료 날씨 API 사용</p>
+        </section>
 
         <section id="welcome-container" class="panel">
             <h2>시작 안내</h2>

@@ -11,119 +11,132 @@ const interpretationElement = document.getElementById('interpretation');
 const progressTextElement = document.getElementById('progress-text');
 const progressBarElement = document.getElementById('progress-bar');
 const questionVisualElement = document.getElementById('question-visual');
+const resultTitleElement = document.getElementById('result-title');
+const resultTraitsElement = document.getElementById('result-traits');
 
 let shuffledQuestions, currentQuestionIndex;
 let score = 0;
+let resultScores = {};
 
 const questions = [
     {
-        question: '다음 수열의 규칙에 맞는 다음 수는? 4, 6, 9, 6, 14, 6, ?',
+        question: '평소보다 지친 날, 가장 먼저 하고 싶은 일은?',
         visual: buildVisual({
-            title: 'Number ladder',
+            title: 'Reset mode',
+            waves: true
+        }),
+        answers: [
+            { text: '침대에 누워 조용히 쉰다', type: 'calm', value: 2 },
+            { text: '맛있는 걸 먹으며 기분 전환', type: 'warm', value: 2 },
+            { text: '가벼운 산책으로 머리 환기', type: 'spark', value: 2 },
+            { text: '친한 사람과 수다로 풀기', type: 'flow', value: 2 }
+        ]
+    },
+    {
+        question: '새로운 환경에 들어갔을 때의 첫 반응은?',
+        visual: buildVisual({
+            title: 'New space',
+            orbits: true
+        }),
+        answers: [
+            { text: '분위기부터 파악한다', type: 'calm', value: 2 },
+            { text: '가벼운 농담으로 분위기를 푼다', type: 'spark', value: 2 },
+            { text: '먼저 말을 걸어본다', type: 'flow', value: 2 },
+            { text: '따뜻한 한 마디로 시작한다', type: 'warm', value: 2 }
+        ]
+    },
+    {
+        question: '해야 할 일이 몰렸을 때 나의 방식은?',
+        visual: buildVisual({
+            title: 'Task stack',
+            steps: true
+        }),
+        answers: [
+            { text: '우선순위를 정하고 차분히 처리', type: 'calm', value: 2 },
+            { text: '작게 나눠서 빠르게 끝낸다', type: 'spark', value: 2 },
+            { text: '주변 도움을 적절히 요청', type: 'flow', value: 2 },
+            { text: '상황을 긍정적으로 해석하며 진행', type: 'warm', value: 2 }
+        ]
+    },
+    {
+        question: '친구가 힘들다고 말했을 때, 가장 먼저 드는 생각은?',
+        visual: buildVisual({
+            title: 'Listening',
+            dots: 7
+        }),
+        answers: [
+            { text: '차분히 이야기를 들어준다', type: 'calm', value: 2 },
+            { text: '작은 행동으로 위로한다', type: 'warm', value: 2 },
+            { text: '기분이 나아질 방법을 함께 찾는다', type: 'spark', value: 2 },
+            { text: '지지와 공감을 많이 표현한다', type: 'flow', value: 2 }
+        ]
+    },
+    {
+        question: '오랜만의 휴일을 보낼 때 가장 끌리는 풍경은?',
+        visual: buildVisual({
+            title: 'Day off',
+            horizon: true
+        }),
+        answers: [
+            { text: '조용한 카페 창가', type: 'calm', value: 2 },
+            { text: '따뜻한 노을이 있는 곳', type: 'warm', value: 2 },
+            { text: '활기찬 시장 거리', type: 'spark', value: 2 },
+            { text: '친구들과 웃음이 있는 공간', type: 'flow', value: 2 }
+        ]
+    },
+    {
+        question: '최근 나를 가장 잘 표현하는 문장은?',
+        visual: buildVisual({
+            title: 'Mood chart',
+            rings: [18, 30, 42]
+        }),
+        answers: [
+            { text: '조용하지만 단단한 하루를 보낸다', type: 'calm', value: 2 },
+            { text: '따뜻하게 분위기를 바꾸는 중', type: 'warm', value: 2 },
+            { text: '새로운 자극을 찾고 있다', type: 'spark', value: 2 },
+            { text: '사람들과 에너지를 나누는 중', type: 'flow', value: 2 }
+        ]
+    },
+    {
+        question: '결정을 내려야 할 때 더 많이 사용하는 건?',
+        visual: buildVisual({
+            title: 'Balance',
+            balance: true
+        }),
+        answers: [
+            { text: '논리와 구조', type: 'calm', value: 2 },
+            { text: '감정과 분위기', type: 'warm', value: 2 },
+            { text: '직감과 속도', type: 'spark', value: 2 },
+            { text: '사람들의 반응', type: 'flow', value: 2 }
+        ]
+    },
+    {
+        question: '다른 사람이 나에게 가장 자주 하는 말은?',
+        visual: buildVisual({
+            title: 'Echo',
             nodes: [
-                { x: 60, y: 80 }, { x: 140, y: 120 }, { x: 220, y: 80 },
-                { x: 300, y: 120 }, { x: 380, y: 80 }, { x: 460, y: 120 }
+                { x: 80, y: 110 }, { x: 160, y: 70 }, { x: 240, y: 110 },
+                { x: 320, y: 70 }, { x: 400, y: 110 }
             ]
         }),
         answers: [
-            { text: '17', correct: false },
-            { text: '19', correct: true },
-            { text: '21', correct: false },
-            { text: '23', correct: false }
+            { text: '믿음직하고 안정적이다', type: 'calm', value: 2 },
+            { text: '포근하고 배려심이 있다', type: 'warm', value: 2 },
+            { text: '에너지 넘치고 밝다', type: 'spark', value: 2 },
+            { text: '사람을 편하게 한다', type: 'flow', value: 2 }
         ]
     },
     {
-        question: '빈칸에 들어갈 수는? 5, 10, 19, 32, ?, 70',
+        question: '내가 요즘 원하는 관계의 온도는?',
         visual: buildVisual({
-            title: 'Rising steps',
-            bars: [20, 40, 64, 92, 124, 160]
+            title: 'Connection',
+            arcs: true
         }),
         answers: [
-            { text: '45', correct: false },
-            { text: '49', correct: true },
-            { text: '51', correct: false },
-            { text: '54', correct: false }
-        ]
-    },
-    {
-        question: '다음 중 규칙을 따르는 도형은? ▲ ■ ▲ ■ ▲ ?',
-        visual: buildVisual({
-            title: 'Shape alternation',
-            shapes: ['triangle', 'square', 'triangle', 'square', 'triangle']
-        }),
-        answers: [
-            { text: '■', correct: true },
-            { text: '▲', correct: false },
-            { text: '●', correct: false },
-            { text: '◆', correct: false }
-        ]
-    },
-    {
-        question: '다음 중 같은 규칙으로 묶인 단어는? 사과, 배, 복숭아, ?',
-        visual: buildVisual({
-            title: 'Cluster',
-            dots: 6
-        }),
-        answers: [
-            { text: '토마토', correct: false },
-            { text: '포도', correct: true },
-            { text: '감자', correct: false },
-            { text: '오이', correct: false }
-        ]
-    },
-    {
-        question: '3, 6, 12, 24, ?, 96 규칙에 맞는 수는?',
-        visual: buildVisual({
-            title: 'Doubling',
-            rings: [16, 26, 36, 46, 56]
-        }),
-        answers: [
-            { text: '36', correct: false },
-            { text: '42', correct: false },
-            { text: '48', correct: true },
-            { text: '60', correct: false }
-        ]
-    },
-    {
-        question: '다음 중 의미가 가장 반대인 단어의 조합은?',
-        visual: buildVisual({
-            title: 'Opposites',
-            arrows: true
-        }),
-        answers: [
-            { text: '밝다 - 환하다', correct: false },
-            { text: '빠르다 - 느리다', correct: true },
-            { text: '가깝다 - 근처다', correct: false },
-            { text: '맛있다 - 좋다', correct: false }
-        ]
-    },
-    {
-        question: 'A는 B의 3배, C는 A의 2배라면 C는 B의 몇 배인가?',
-        visual: buildVisual({
-            title: 'Ratio',
-            bars: [40, 120, 240]
-        }),
-        answers: [
-            { text: '5배', correct: false },
-            { text: '6배', correct: true },
-            { text: '7배', correct: false },
-            { text: '8배', correct: false }
-        ]
-    },
-    {
-        question: '빈칸에 들어갈 알파벳은? A, C, F, J, O, ?',
-        visual: buildVisual({
-            title: 'Letter jumps',
-            nodes: [
-                { x: 70, y: 110 }, { x: 150, y: 80 }, { x: 230, y: 110 },
-                { x: 310, y: 70 }, { x: 390, y: 110 }
-            ]
-        }),
-        answers: [
-            { text: 'T', correct: false },
-            { text: 'U', correct: true },
-            { text: 'V', correct: false },
-            { text: 'W', correct: false }
+            { text: '적당한 거리감이 있는 관계', type: 'calm', value: 2 },
+            { text: '자주 챙기는 따뜻한 관계', type: 'warm', value: 2 },
+            { text: '새로운 만남이 많은 관계', type: 'spark', value: 2 },
+            { text: '깊이 있는 대화를 나누는 관계', type: 'flow', value: 2 }
         ]
     }
 ];
@@ -137,6 +150,7 @@ restartButton.addEventListener('click', startGame);
 
 function startGame() {
     score = 0;
+    resultScores = { calm: 0, warm: 0, spark: 0, flow: 0 };
     welcomeContainer.style.display = 'none';
     resultsContainer.style.display = 'none';
     quizContainer.style.display = 'block';
@@ -163,16 +177,14 @@ function showQuestion(question) {
         const button = document.createElement('button');
         button.innerText = answer.text;
         button.classList.add('answer-btn');
-        if (answer.correct) {
-            button.dataset.correct = answer.correct;
-        }
+        button.dataset.type = answer.type;
+        button.dataset.value = answer.value;
         button.addEventListener('click', selectAnswer);
         answerButtonsElement.appendChild(button);
     });
 }
 
 function resetState() {
-    clearStatusClass(document.body);
     nextButton.style.display = 'block';
     nextButton.disabled = true;
     questionVisualElement.innerHTML = '';
@@ -183,38 +195,31 @@ function resetState() {
 
 function selectAnswer(e) {
     const selectedButton = e.target;
-    const correct = selectedButton.dataset.correct;
-    if (correct) {
-        score++;
+    const selectedType = selectedButton.dataset.type;
+    const selectedValue = Number(selectedButton.dataset.value) || 0;
+    if (selectedType) {
+        resultScores[selectedType] += selectedValue;
+        score += selectedValue;
     }
     Array.from(answerButtonsElement.children).forEach(button => {
-        setStatusClass(button, button.dataset.correct);
+        button.classList.remove('selected');
         button.disabled = true;
     });
+    selectedButton.classList.add('selected');
     nextButton.disabled = false;
 }
 
-function setStatusClass(element, correct) {
-    clearStatusClass(element);
-    if (correct) {
-        element.classList.add('correct');
-    } else {
-        element.classList.add('wrong');
-    }
-}
-
-function clearStatusClass(element) {
-    element.classList.remove('correct');
-    element.classList.remove('wrong');
-}
 
 function showResults() {
     quizContainer.style.display = 'none';
     resultsContainer.style.display = 'block';
-    const total = questions.length;
+    const total = questions.length * 2;
     const percent = Math.round((score / total) * 100);
-    scoreElement.innerText = `정답 ${score} / ${total} (${percent}%)`;
-    interpretationElement.innerText = getInterpretation(percent);
+    scoreElement.innerText = `총 점수 ${score} / ${total} (${percent}%)`;
+    const result = getResultType();
+    resultTitleElement.innerText = result.title;
+    interpretationElement.innerText = result.description;
+    resultTraitsElement.innerHTML = result.traits.map(trait => `<li>${trait}</li>`).join('');
 }
 
 function updateProgress() {
@@ -237,17 +242,33 @@ function renderVisual(svgMarkup) {
     questionVisualElement.innerHTML = svgMarkup;
 }
 
-function getInterpretation(percent) {
-    if (percent >= 90) {
-        return '탁월한 규칙 추론 능력! 고난도 문항에 도전해 보세요.';
-    }
-    if (percent >= 70) {
-        return '상위권의 논리 감각입니다. 복합 규칙 문제에서 더 강해질 수 있어요.';
-    }
-    if (percent >= 50) {
-        return '균형 잡힌 추론력입니다. 계산+언어형 문제를 추가로 연습해 보세요.';
-    }
-    return '기초 패턴 감각을 다지는 단계입니다. 천천히 다시 풀어보면 좋아요.';
+function getResultType() {
+    const entries = Object.entries(resultScores);
+    entries.sort((a, b) => b[1] - a[1]);
+    const top = entries[0]?.[0] || 'calm';
+    const catalog = {
+        calm: {
+            title: '차분한 온기형',
+            description: '감정을 정리하며 안정적으로 에너지를 회복하는 타입입니다.',
+            traits: ['혼자만의 리셋 시간이 필요함', '정리된 환경에서 컨디션 상승', '결정을 신중하게 내림']
+        },
+        warm: {
+            title: '따뜻한 공감형',
+            description: '사람의 기분을 부드럽게 올려 주는 따뜻한 에너지가 강합니다.',
+            traits: ['다정한 말투가 기본값', '주변을 자연스럽게 챙김', '감정의 온도를 잘 읽음']
+        },
+        spark: {
+            title: '반짝 자극형',
+            description: '새로운 자극을 통해 에너지를 끌어올리는 타입입니다.',
+            traits: ['변화를 빠르게 수용', '즉흥적인 활력이 강함', '아이디어 전환이 빠름']
+        },
+        flow: {
+            title: '유연한 교류형',
+            description: '대화와 교류를 통해 컨디션을 회복하는 타입입니다.',
+            traits: ['공감형 대화에 강함', '사람들과 있을 때 컨디션 상승', '관계 속 균형을 잘 맞춤']
+        }
+    };
+    return catalog[top] || catalog.calm;
 }
 
 function buildVisual(config) {
@@ -256,15 +277,71 @@ function buildVisual(config) {
     const background = `<rect width="520" height="180" rx="22" fill="rgba(255,255,255,0.6)" stroke="rgba(29,27,22,0.08)" />`;
     const title = `<text x="24" y="32" font-size="12" fill="rgba(29,27,22,0.45)" font-family="Gowun Dodum, sans-serif">${config.title}</text>`;
 
+    if (config.waves) {
+        const waves = `
+            <path d="M40 110c40-30 90-30 130 0 40 30 90 30 130 0 40-30 90-30 130 0" fill="none" stroke="rgba(255,138,91,0.6)" stroke-width="6" stroke-linecap="round"/>
+            <path d="M70 140c30-20 70-20 100 0 30 20 70 20 100 0 30-20 70-20 100 0" fill="none" stroke="rgba(111,123,247,0.5)" stroke-width="5" stroke-linecap="round"/>
+        `;
+        return `${header}${background}${title}${waves}${footer}`;
+    }
+
+    if (config.orbits) {
+        const orbits = `
+            <circle cx="180" cy="110" r="48" fill="none" stroke="rgba(111,123,247,0.5)" stroke-width="4"/>
+            <circle cx="300" cy="90" r="30" fill="none" stroke="rgba(255,138,91,0.55)" stroke-width="4"/>
+            <circle cx="380" cy="120" r="22" fill="rgba(255,138,91,0.2)"/>
+        `;
+        return `${header}${background}${title}${orbits}${footer}`;
+    }
+
+    if (config.steps) {
+        const steps = `
+            <rect x="90" y="110" width="70" height="30" rx="10" fill="rgba(255,138,91,0.6)"/>
+            <rect x="180" y="90" width="70" height="50" rx="10" fill="rgba(111,123,247,0.5)"/>
+            <rect x="270" y="70" width="70" height="70" rx="10" fill="rgba(255,138,91,0.45)"/>
+            <rect x="360" y="55" width="70" height="85" rx="10" fill="rgba(111,123,247,0.4)"/>
+        `;
+        return `${header}${background}${title}${steps}${footer}`;
+    }
+
+    if (config.horizon) {
+        const horizon = `
+            <circle cx="120" cy="90" r="36" fill="rgba(255,138,91,0.4)"/>
+            <rect x="60" y="110" width="400" height="40" rx="20" fill="rgba(111,123,247,0.25)"/>
+            <path d="M80 135h360" stroke="rgba(22,26,34,0.25)" stroke-width="4" stroke-linecap="round"/>
+        `;
+        return `${header}${background}${title}${horizon}${footer}`;
+    }
+
+    if (config.balance) {
+        const balance = `
+            <rect x="250" y="60" width="20" height="80" rx="8" fill="rgba(22,26,34,0.3)"/>
+            <path d="M150 90h220" stroke="rgba(22,26,34,0.3)" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="170" cy="110" r="24" fill="rgba(111,123,247,0.45)"/>
+            <circle cx="350" cy="110" r="24" fill="rgba(255,138,91,0.45)"/>
+        `;
+        return `${header}${background}${title}${balance}${footer}`;
+    }
+
+    if (config.arcs) {
+        const arcs = `
+            <path d="M100 130c50-60 130-60 180 0" fill="none" stroke="rgba(255,138,91,0.55)" stroke-width="6" stroke-linecap="round"/>
+            <path d="M200 130c40-50 100-50 140 0" fill="none" stroke="rgba(111,123,247,0.5)" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="140" cy="105" r="10" fill="rgba(111,123,247,0.6)"/>
+            <circle cx="320" cy="105" r="10" fill="rgba(255,138,91,0.6)"/>
+        `;
+        return `${header}${background}${title}${arcs}${footer}`;
+    }
+
     if (config.nodes) {
         const points = config.nodes
-            .map(node => `<circle cx="${node.x}" cy="${node.y}" r="10" fill="rgba(255,122,69,0.7)" />`)
+            .map(node => `<circle cx="${node.x}" cy="${node.y}" r="10" fill="rgba(255,138,91,0.7)" />`)
             .join('');
         const lines = config.nodes
             .slice(0, -1)
             .map((node, index) => {
                 const next = config.nodes[index + 1];
-                return `<line x1="${node.x}" y1="${node.y}" x2="${next.x}" y2="${next.y}" stroke="rgba(47,127,118,0.6)" stroke-width="3" />`;
+                return `<line x1="${node.x}" y1="${node.y}" x2="${next.x}" y2="${next.y}" stroke="rgba(111,123,247,0.6)" stroke-width="3" />`;
             })
             .join('');
         return `${header}${background}${title}${lines}${points}${footer}`;
@@ -275,7 +352,7 @@ function buildVisual(config) {
             .map((height, index) => {
                 const x = 70 + index * 60;
                 const y = 150 - height;
-                return `<rect x="${x}" y="${y}" width="30" height="${height}" rx="6" fill="rgba(47,127,118,0.65)" />`;
+                return `<rect x="${x}" y="${y}" width="30" height="${height}" rx="6" fill="rgba(111,123,247,0.65)" />`;
             })
             .join('');
         return `${header}${background}${title}${bars}${footer}`;
@@ -286,10 +363,10 @@ function buildVisual(config) {
             .map((shape, index) => {
                 const x = 90 + index * 80;
                 if (shape === 'triangle') {
-                    return `<polygon points="${x},70 ${x - 18},110 ${x + 18},110" fill="rgba(255,122,69,0.7)" />`;
+                    return `<polygon points="${x},70 ${x - 18},110 ${x + 18},110" fill="rgba(255,138,91,0.7)" />`;
                 }
                 if (shape === 'square') {
-                    return `<rect x="${x - 18}" y="78" width="36" height="36" rx="6" fill="rgba(47,127,118,0.7)" />`;
+                    return `<rect x="${x - 18}" y="78" width="36" height="36" rx="6" fill="rgba(111,123,247,0.7)" />`;
                 }
                 return '';
             })
@@ -301,14 +378,14 @@ function buildVisual(config) {
         const dots = Array.from({ length: config.dots }).map((_, index) => {
             const x = 120 + (index % 3) * 90;
             const y = 80 + Math.floor(index / 3) * 40;
-            return `<circle cx="${x}" cy="${y}" r="10" fill="rgba(255,122,69,0.6)" />`;
+            return `<circle cx="${x}" cy="${y}" r="10" fill="rgba(255,138,91,0.6)" />`;
         }).join('');
         return `${header}${background}${title}${dots}${footer}`;
     }
 
     if (config.rings) {
         const rings = config.rings
-            .map((r, index) => `<circle cx="${100 + index * 80}" cy="110" r="${r}" fill="none" stroke="rgba(47,127,118,0.5)" stroke-width="4" />`)
+            .map((r, index) => `<circle cx="${160 + index * 80}" cy="110" r="${r}" fill="none" stroke="rgba(111,123,247,0.5)" stroke-width="4" />`)
             .join('');
         return `${header}${background}${title}${rings}${footer}`;
     }

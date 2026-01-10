@@ -1,13 +1,13 @@
-@import url("https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Serif+KR:wght@600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Gowun+Batang:wght@600;700&display=swap");
 
 :root {
-    --ink: #1d1b16;
-    --muted: #5e5a52;
-    --panel: rgba(255, 252, 245, 0.92);
-    --accent: #ff7a45;
-    --accent-dark: #d45b2d;
-    --accent-2: #2f7f76;
-    --line: rgba(29, 27, 22, 0.12);
+    --ink: #161a22;
+    --muted: #5a6275;
+    --panel: rgba(255, 255, 255, 0.94);
+    --accent: #ff8a5b;
+    --accent-dark: #e26a42;
+    --accent-2: #6f7bf7;
+    --line: rgba(22, 26, 34, 0.12);
 }
 
 * {
@@ -15,9 +15,9 @@
 }
 
 body {
-    font-family: "Gowun Dodum", "Noto Serif KR", serif;
+    font-family: "Gowun Dodum", "Gowun Batang", serif;
     color: var(--ink);
-    background: radial-gradient(circle at top left, #ffe6c7, #f4d9cf 40%, #d1e4df 75%, #bdd0e4);
+    background: radial-gradient(circle at 20% 10%, #ffe0c7, #f6d9ea 42%, #d3e4ff 70%, #c6f0f5);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,8 +28,9 @@ body {
 }
 
 h1,
-h2 {
-    font-family: "Noto Serif KR", serif;
+h2,
+h3 {
+    font-family: "Gowun Batang", serif;
     margin: 0 0 12px;
     letter-spacing: -0.02em;
 }
@@ -113,8 +114,8 @@ h2 {
     height: 180px;
     border-radius: 18px;
     margin: 18px 0 6px;
-    background: linear-gradient(135deg, rgba(255, 122, 69, 0.2), rgba(47, 127, 118, 0.25));
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 220'><defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop offset='0' stop-color='%23ffb08a'/><stop offset='1' stop-color='%239fd3c7'/></linearGradient></defs><rect width='600' height='220' rx='24' fill='url(%23g)'/><circle cx='120' cy='110' r='60' fill='rgba(255,255,255,0.5)'/><circle cx='480' cy='90' r='40' fill='rgba(255,255,255,0.5)'/><path d='M210 150h180' stroke='rgba(29,27,22,0.2)' stroke-width='6' stroke-linecap='round'/><path d='M260 80h140' stroke='rgba(29,27,22,0.2)' stroke-width='6' stroke-linecap='round'/><path d='M310 110l20 20 30-40' stroke='rgba(29,27,22,0.35)' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background: linear-gradient(135deg, rgba(255, 138, 91, 0.2), rgba(111, 123, 247, 0.2));
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 220'><defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop offset='0' stop-color='%23ffc3a0'/><stop offset='1' stop-color='%23c6d4ff'/></linearGradient></defs><rect width='600' height='220' rx='24' fill='url(%23g)'/><path d='M60 150c40-40 90-60 150-50 60 10 90 50 150 30 60-20 120-20 180 10' fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='8' stroke-linecap='round'/><circle cx='110' cy='80' r='34' fill='rgba(255,255,255,0.55)'/><circle cx='480' cy='130' r='46' fill='rgba(255,255,255,0.4)'/><path d='M260 90h160' stroke='rgba(22,26,34,0.25)' stroke-width='6' stroke-linecap='round'/><path d='M300 120l16 16 26-34' stroke='rgba(22,26,34,0.35)' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
     background-size: cover;
     border: 1px solid rgba(29, 27, 22, 0.08);
 }
@@ -202,14 +203,10 @@ h2 {
     box-shadow: none;
 }
 
-.answer-btn.correct {
-    background: rgba(47, 127, 118, 0.15);
-    border-color: var(--accent-2);
-}
-
-.answer-btn.wrong {
-    background: rgba(255, 122, 69, 0.2);
-    border-color: var(--accent);
+.answer-btn.selected {
+    background: rgba(111, 123, 247, 0.12);
+    border-color: rgba(111, 123, 247, 0.6);
+    box-shadow: 0 12px 24px rgba(111, 123, 247, 0.2);
 }
 
 .primary-btn,
@@ -249,6 +246,21 @@ h2 {
 .score {
     font-size: 1.4rem;
     margin: 12px 0 6px;
+}
+
+.result-title {
+    margin-top: 4px;
+    font-size: 1.2rem;
+}
+
+.result-traits {
+    margin: 16px 0 22px;
+    padding-left: 18px;
+    color: var(--muted);
+}
+
+.result-traits li {
+    margin-bottom: 6px;
 }
 
 .interpretation {

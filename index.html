@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마지막 한마디 - 묘비명과 묘지 디자인 스튜디오</title>
+    <title>마지막 한마디 - 묘비명과 묘지 디자인</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="scene">
+    <div class="scene" aria-hidden="true">
         <span class="veil veil-a"></span>
         <span class="veil veil-b"></span>
         <span class="veil veil-c"></span>
@@ -18,15 +18,14 @@
         <div class="logo">
             <span class="logo-mark"></span>
             <div>
-                <p class="logo-label">Last Whisper</p>
+                <p class="logo-label">LAST WHISPER</p>
                 <p class="logo-title">마지막 한마디</p>
             </div>
         </div>
         <nav class="nav">
+            <a href="#inspiration">영감</a>
             <a href="#composer">묘비명</a>
             <a href="#cemetery">묘지 디자인</a>
-            <a href="#inspiration">영감</a>
-            <a href="#journey">머무는 시간</a>
         </nav>
         <button class="ghost-btn" id="save-btn" type="button">초안 저장</button>
     </header>
@@ -34,34 +33,21 @@
     <main class="app">
         <section class="hero" aria-labelledby="hero-title">
             <div class="hero-text">
-                <p class="eyebrow">A place to pause</p>
-                <h1 id="hero-title">인생의 마지막 한마디를 남기는 공간.</h1>
+                <p class="eyebrow">본질만 남긴 기록</p>
+                <h1 id="hero-title">다른 이의 마지막 한마디에서 배우고, 내 마지막 한마디를 미리 써 봅니다.</h1>
                 <p class="subhead">
-                    묘비명과 묘지 디자인을 직접 설계하고, 떠나는 사람과 남는 사람을 위해 조용히 머무를 수 있는
-                    시간을 만듭니다.
+                    남겨진 문장을 읽으며 삶의 방향을 되짚고, 내가 남길 묘비명에 걸맞은 사람으로 살아가기를
+                    스스로에게 묻는 공간입니다.
                 </p>
                 <div class="hero-actions">
                     <button class="primary-btn" type="button" id="start-compose">묘비명 쓰기</button>
                     <button class="ghost-btn" type="button" id="start-design">묘지 디자인 보기</button>
                 </div>
-                <div class="hero-stats">
-                    <div>
-                        <p class="stat-value">48</p>
-                        <p class="stat-label">세계의 묘지 스타일</p>
-                    </div>
-                    <div>
-                        <p class="stat-value">3</p>
-                        <p class="stat-label">감정 톤 프리셋</p>
-                    </div>
-                    <div>
-                        <p class="stat-value">24/7</p>
-                        <p class="stat-label">차분한 조명</p>
-                    </div>
-                </div>
+                <p class="hero-note">불필요한 장식은 덜고, 기록과 성찰만 남겼습니다.</p>
             </div>
             <div class="hero-card" aria-hidden="true">
                 <div class="hero-card-inner" id="preview-hero-card">
-                    <p class="hero-card-title">미리보기</p>
+                    <p class="hero-card-kicker">지금의 한마디</p>
                     <p class="hero-card-name" id="preview-name">이름을 남겨주세요</p>
                     <p class="hero-card-dates" id="preview-dates">YYYY — YYYY</p>
                     <p class="hero-card-epitaph" id="preview-epitaph">별빛이 남긴 문장, 여기에서 천천히 읽힙니다.</p>
@@ -73,11 +59,28 @@
             </div>
         </section>
 
+        <section id="inspiration" class="panel" aria-labelledby="inspiration-title">
+            <div class="panel-title">
+                <div>
+                    <p class="eyebrow">Inspiration</p>
+                    <h2 id="inspiration-title">사람들이 남긴 마지막 한마디</h2>
+                    <p class="panel-sub">공감되는 문장을 읽으며 나에게도 어울리는 한 줄을 떠올려보세요.</p>
+                </div>
+                <div class="panel-actions">
+                    <button class="ghost-btn" type="button" id="refresh-epitaphs">새로고침</button>
+                    <button class="primary-btn" type="button" id="share-epitaph">현재 문장 공유</button>
+                </div>
+            </div>
+            <p class="panel-note" id="backend-note"></p>
+            <div class="inspiration-list" id="inspiration-list"></div>
+        </section>
+
         <section id="composer" class="panel composer" aria-labelledby="composer-title">
             <div class="panel-title">
                 <div>
-                    <p class="eyebrow">Epitaph Studio</p>
-                    <h2 id="composer-title">묘비명 작성을 위한 조용한 작업실</h2>
+                    <p class="eyebrow">Epitaph</p>
+                    <h2 id="composer-title">내 마지막 한마디를 정리합니다</h2>
+                    <p class="panel-sub">남길 이름과 생애, 그리고 기억하고 싶은 문장을 담아보세요.</p>
                 </div>
                 <div class="panel-actions">
                     <button class="ghost-btn" type="button" id="random-btn">영감 한 줄</button>
@@ -161,74 +164,14 @@
         <section id="cemetery" class="panel" aria-labelledby="cemetery-title">
             <div class="panel-title">
                 <div>
-                    <p class="eyebrow">Cemetery Atelier</p>
-                    <h2 id="cemetery-title">세상의 묘지를 한 곳에서 디자인하기</h2>
+                    <p class="eyebrow">Place</p>
+                    <h2 id="cemetery-title">머무를 곳을 고릅니다</h2>
+                    <p class="panel-sub">살아 있는 지금, 내가 머물고 싶은 공간을 조용히 상상해보세요.</p>
                 </div>
-                <p class="panel-sub">세계 곳곳의 묘지 풍경을 바탕으로 조용하고 오래 머물 수 있는 배경을 골라보세요.</p>
             </div>
             <div class="cemetery-grid" id="cemetery-grid"></div>
         </section>
-
-        <section id="inspiration" class="panel" aria-labelledby="inspiration-title">
-            <div class="panel-title inspiration-head">
-                <div>
-                    <p class="eyebrow">Inspiration Wall</p>
-                    <h2 id="inspiration-title">사람들이 남긴 마지막 한마디</h2>
-                    <p class="panel-sub">좋아요가 많이 쌓인 문장이 상단에 표시됩니다. 조용히 읽고, 공감되는 한 줄을 남겨주세요.</p>
-                </div>
-                <div class="panel-actions">
-                    <button class="ghost-btn" type="button" id="refresh-epitaphs">새로고침</button>
-                    <button class="primary-btn" type="button" id="share-epitaph">현재 문장 공유</button>
-                </div>
-            </div>
-            <p class="panel-note" id="backend-note"></p>
-            <div class="inspiration-list" id="inspiration-list"></div>
-        </section>
-
-        <section id="journey" class="panel journey" aria-labelledby="journey-title">
-            <div class="panel-title">
-                <div>
-                    <p class="eyebrow">Stay awhile</p>
-                    <h2 id="journey-title">남겨진 시간을 위한 여정</h2>
-                </div>
-                <p class="panel-sub">묘비명과 묘지 디자인을 마친 뒤, 기억을 남기는 의식을 설계할 수 있어요.</p>
-            </div>
-            <div class="journey-grid">
-                <div class="journey-card">
-                    <p class="journey-step">01</p>
-                    <h3>조용한 낭독</h3>
-                    <p>묘비명과 함께 남겨진 사람들의 목소리를 기록합니다.</p>
-                </div>
-                <div class="journey-card">
-                    <p class="journey-step">02</p>
-                    <h3>기억의 물건</h3>
-                    <p>사진, 편지, 조각 등을 함께 전시할 수 있는 작은 공간을 제안합니다.</p>
-                </div>
-                <div class="journey-card">
-                    <p class="journey-step">03</p>
-                    <h3>머무는 시간표</h3>
-                    <p>새벽, 오후, 밤. 고요한 시간대를 예약해 차분히 머물 수 있습니다.</p>
-                </div>
-            </div>
-            <div class="closing">
-                <p class="closing-text">떠나는 사람을 기억하는 방식은 조용하지만 단단해야 합니다.</p>
-                <button class="primary-btn" type="button">리추얼 설계하기</button>
-            </div>
-        </section>
     </main>
-
-    <footer class="footer">
-        <div>
-            <p class="footer-title">마지막 한마디</p>
-            <p class="footer-copy">초안은 브라우저에 저장되고, 공유를 선택한 문장은 서버에 랭킹으로 남습니다.</p>
-        </div>
-        <div class="footer-links">
-            <a href="#composer">묘비명 쓰기</a>
-            <a href="#cemetery">묘지 디자인</a>
-            <a href="#inspiration">영감</a>
-            <a href="#journey">머무는 시간</a>
-        </div>
-    </footer>
 
     <script src="main.js"></script>
 </body>

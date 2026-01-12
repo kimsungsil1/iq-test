@@ -25,6 +25,9 @@ const previewEpitaphLg = document.getElementById('preview-epitaph-lg');
 const previewToneLg = document.getElementById('preview-tone-lg');
 const previewAudience = document.getElementById('preview-audience');
 const previewCard = document.getElementById('preview-card');
+const tombstoneName = document.getElementById('tombstone-name');
+const tombstoneDates = document.getElementById('tombstone-dates');
+const tombstoneEpitaph = document.getElementById('tombstone-epitaph');
 
 const cemeteryGrid = document.getElementById('cemetery-grid');
 const inspirationList = document.getElementById('inspiration-list');
@@ -221,6 +224,10 @@ function updatePreview() {
     previewEpitaphLg.textContent = epitaphValue;
     previewToneLg.textContent = toneValue;
     previewAudience.textContent = audienceValue;
+
+    tombstoneName.textContent = nameValue;
+    tombstoneDates.textContent = `${birthValue} — ${deathValue}`;
+    tombstoneEpitaph.textContent = epitaphValue;
 }
 
 function getSelectedTone() {

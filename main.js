@@ -1,491 +1,570 @@
-const startButton = document.getElementById('start-btn');
-const nextButton = document.getElementById('next-btn');
-const restartButton = document.getElementById('restart-btn');
-const welcomeContainer = document.getElementById('welcome-container');
-const quizContainer = document.getElementById('quiz-container');
-const resultsContainer = document.getElementById('results-container');
-const questionElement = document.getElementById('question');
-const answerButtonsElement = document.getElementById('answer-buttons');
-const scoreElement = document.getElementById('score');
-const interpretationElement = document.getElementById('interpretation');
-const progressTextElement = document.getElementById('progress-text');
-const progressBarElement = document.getElementById('progress-bar');
-const questionVisualElement = document.getElementById('question-visual');
-const resultTitleElement = document.getElementById('result-title');
-const resultTraitsElement = document.getElementById('result-traits');
-const weatherStatusElement = document.getElementById('weather-status');
-const weatherTempElement = document.getElementById('weather-temp');
-const weatherSummaryElement = document.getElementById('weather-summary');
-const weatherFeelsElement = document.getElementById('weather-feels');
-const weatherHumidityElement = document.getElementById('weather-humidity');
-const weatherWindElement = document.getElementById('weather-wind');
-const weatherRefreshButton = document.getElementById('weather-refresh');
+const nameInput = document.getElementById('name-input');
+const birthInput = document.getElementById('birth-input');
+const deathInput = document.getElementById('death-input');
+const taglineInput = document.getElementById('tagline-input');
+const epitaphInput = document.getElementById('epitaph-input');
+const audienceInput = document.getElementById('audience-input');
+const countNow = document.getElementById('count-now');
+const randomButton = document.getElementById('random-btn');
+const composeButton = document.getElementById('compose-btn');
+const saveButton = document.getElementById('save-btn');
+const startComposeButton = document.getElementById('start-compose');
+const startDesignButton = document.getElementById('start-design');
 
-let shuffledQuestions, currentQuestionIndex;
-let score = 0;
-let resultScores = {};
+const previewName = document.getElementById('preview-name');
+const previewDates = document.getElementById('preview-dates');
+const previewEpitaph = document.getElementById('preview-epitaph');
+const previewStyle = document.getElementById('preview-style');
+const previewTone = document.getElementById('preview-tone');
+const previewHeroCard = document.getElementById('preview-hero-card');
 
-const weatherCodeMap = {
-    0: '맑음',
-    1: '대체로 맑음',
-    2: '부분적으로 흐림',
-    3: '흐림',
-    45: '안개',
-    48: '착빙 안개',
-    51: '이슬비',
-    53: '약한 이슬비',
-    55: '강한 이슬비',
-    61: '약한 비',
-    63: '비',
-    65: '강한 비',
-    71: '약한 눈',
-    73: '눈',
-    75: '강한 눈',
-    80: '약한 소나기',
-    81: '소나기',
-    82: '강한 소나기',
-    95: '뇌우',
-    96: '뇌우/우박',
-    99: '강한 뇌우/우박'
+const previewNameLg = document.getElementById('preview-name-lg');
+const previewDatesLg = document.getElementById('preview-dates-lg');
+const previewTagline = document.getElementById('preview-tagline');
+const previewEpitaphLg = document.getElementById('preview-epitaph-lg');
+const previewToneLg = document.getElementById('preview-tone-lg');
+const previewAudience = document.getElementById('preview-audience');
+const previewCard = document.getElementById('preview-card');
+
+const cemeteryGrid = document.getElementById('cemetery-grid');
+const inspirationList = document.getElementById('inspiration-list');
+const refreshEpitaphsButton = document.getElementById('refresh-epitaphs');
+const shareEpitaphButton = document.getElementById('share-epitaph');
+const backendNote = document.getElementById('backend-note');
+
+// Set your Firebase Realtime Database URL to enable shared rankings.
+const FIREBASE_DB_URL = 'https://YOUR_PROJECT.firebaseio.com';
+const backendEnabled = !FIREBASE_DB_URL.includes('YOUR_PROJECT');
+const voteStorageKey = 'lastWhisperVotes';
+let currentEpitaphs = {};
+let selectedStyle = null;
+let preferredStyleId = null;
+
+const tones = {
+    '담담한': [
+        '여기에서 잠시 쉬었다 갑니다.',
+        '삶의 숨결을 조용히 접어 둡니다.',
+        '긴 하루의 끝에서 고요를 마주합니다.'
+    ],
+    '따뜻한': [
+        '당신이 웃어준 기억이 아직 따뜻합니다.',
+        '사랑은 여기에서 더 오래 머뭅니다.',
+        '함께한 시간들이 작은 불빛이 됩니다.'
+    ],
+    '시적인': [
+        '바람은 이름을 불러주고, 별은 길을 밝혀줍니다.',
+        '빛과 그림자가 교차하는 자리에 잠시 머뭅니다.',
+        '이곳에 닿는 발걸음마다 꽃이 됩니다.'
+    ]
 };
 
-const questions = [
+const cemeteryStyles = [
     {
-        question: '평소보다 지친 날, 가장 먼저 하고 싶은 일은?',
-        visual: buildVisual({
-            title: 'Reset mode',
-            waves: true
-        }),
-        answers: [
-            { text: '침대에 누워 조용히 쉰다', type: 'calm', value: 2 },
-            { text: '맛있는 걸 먹으며 기분 전환', type: 'warm', value: 2 },
-            { text: '가벼운 산책으로 머리 환기', type: 'spark', value: 2 },
-            { text: '친한 사람과 수다로 풀기', type: 'flow', value: 2 }
-        ]
+        id: 'hill',
+        name: '언덕의 잔디 묘지',
+        mood: '잔잔한 곡선과 낮은 비석',
+        materials: '석회암, 잔디',
+        location: '영국 교회 묘지',
+        image: 'https://live.staticflickr.com/4027/4326332110_c7678727f4_b.jpg',
+        credit: 'ell brown · CC BY',
+        creditUrl: 'https://www.flickr.com/photos/39415781@N06/4326332110'
     },
     {
-        question: '새로운 환경에 들어갔을 때의 첫 반응은?',
-        visual: buildVisual({
-            title: 'New space',
-            orbits: true
-        }),
-        answers: [
-            { text: '분위기부터 파악한다', type: 'calm', value: 2 },
-            { text: '가벼운 농담으로 분위기를 푼다', type: 'spark', value: 2 },
-            { text: '먼저 말을 걸어본다', type: 'flow', value: 2 },
-            { text: '따뜻한 한 마디로 시작한다', type: 'warm', value: 2 }
-        ]
+        id: 'forest',
+        name: '숲길 속 묘지',
+        mood: '나무 사이로 스며드는 빛',
+        materials: '현무암, 삼나무',
+        location: '라트비아 숲묘지',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Memorial_for_Dievturi_%28Latvian_pagan%29_victims_of_Soviet_rule_1942-1952%2C_Forest_Cemetery%2C_Riga%2C_Latvia.jpg',
+        credit: 'Ubel · CC BY-SA',
+        creditUrl: 'https://commons.wikimedia.org/w/index.php?curid=58486419'
     },
     {
-        question: '해야 할 일이 몰렸을 때 나의 방식은?',
-        visual: buildVisual({
-            title: 'Task stack',
-            steps: true
-        }),
-        answers: [
-            { text: '우선순위를 정하고 차분히 처리', type: 'calm', value: 2 },
-            { text: '작게 나눠서 빠르게 끝낸다', type: 'spark', value: 2 },
-            { text: '주변 도움을 적절히 요청', type: 'flow', value: 2 },
-            { text: '상황을 긍정적으로 해석하며 진행', type: 'warm', value: 2 }
-        ]
+        id: 'desert',
+        name: '사막의 기념 정원',
+        mood: '넓은 하늘과 따뜻한 돌',
+        materials: '테라코타, 모래석',
+        location: '미국 사막 지대',
+        image: 'https://live.staticflickr.com/16/92562598_b31967bb47_b.jpg',
+        credit: 'dbking · CC BY',
+        creditUrl: 'https://www.flickr.com/photos/65193799@N00/92562598'
     },
     {
-        question: '친구가 힘들다고 말했을 때, 가장 먼저 드는 생각은?',
-        visual: buildVisual({
-            title: 'Listening',
-            dots: 7
-        }),
-        answers: [
-            { text: '차분히 이야기를 들어준다', type: 'calm', value: 2 },
-            { text: '작은 행동으로 위로한다', type: 'warm', value: 2 },
-            { text: '기분이 나아질 방법을 함께 찾는다', type: 'spark', value: 2 },
-            { text: '지지와 공감을 많이 표현한다', type: 'flow', value: 2 }
-        ]
+        id: 'harbor',
+        name: '바다를 보는 묘지',
+        mood: '파도 소리와 수평선',
+        materials: '화강암, 청석',
+        location: '포르투갈 해안',
+        image: 'https://live.staticflickr.com/1508/25812663560_fc98157c7f_b.jpg',
+        credit: 'D-Stanley · CC BY',
+        creditUrl: 'https://www.flickr.com/photos/79721788@N00/25812663560'
     },
     {
-        question: '오랜만의 휴일을 보낼 때 가장 끌리는 풍경은?',
-        visual: buildVisual({
-            title: 'Day off',
-            horizon: true
-        }),
-        answers: [
-            { text: '조용한 카페 창가', type: 'calm', value: 2 },
-            { text: '따뜻한 노을이 있는 곳', type: 'warm', value: 2 },
-            { text: '활기찬 시장 거리', type: 'spark', value: 2 },
-            { text: '친구들과 웃음이 있는 공간', type: 'flow', value: 2 }
-        ]
+        id: 'city',
+        name: '도시의 작은 정원',
+        mood: '정돈된 선과 따뜻한 조명',
+        materials: '브라스, 회색석',
+        location: '이탈리아 체세나',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/0/07/The_mausoleum_of_the_Marquess_Marquesses_Palazzo_Ghini_Ghini_in_the_Urban_Cemetery_of_Cesena-Il_mausoleo_dei_Marchese_Marchesi_Palazzo_Ghini_Ghini_nel_Cimitero_Urbano_di_Cesena..jpg',
+        credit: 'Gianluca Bianchi · CC0',
+        creditUrl: 'https://commons.wikimedia.org/w/index.php?curid=23057702'
     },
     {
-        question: '최근 나를 가장 잘 표현하는 문장은?',
-        visual: buildVisual({
-            title: 'Mood chart',
-            rings: [18, 30, 42]
-        }),
-        answers: [
-            { text: '조용하지만 단단한 하루를 보낸다', type: 'calm', value: 2 },
-            { text: '따뜻하게 분위기를 바꾸는 중', type: 'warm', value: 2 },
-            { text: '새로운 자극을 찾고 있다', type: 'spark', value: 2 },
-            { text: '사람들과 에너지를 나누는 중', type: 'flow', value: 2 }
-        ]
+        id: 'island',
+        name: '섬의 돌정원',
+        mood: '바람과 돌 사이의 여백',
+        materials: '현무암, 조약돌',
+        location: '노퍽섬 해안',
+        image: 'https://live.staticflickr.com/3738/11791295794_f029a3da85_b.jpg',
+        credit: 'DrBob317 · CC BY-SA',
+        creditUrl: 'https://www.flickr.com/photos/33425911@N06/11791295794'
     },
     {
-        question: '결정을 내려야 할 때 더 많이 사용하는 건?',
-        visual: buildVisual({
-            title: 'Balance',
-            balance: true
-        }),
-        answers: [
-            { text: '논리와 구조', type: 'calm', value: 2 },
-            { text: '감정과 분위기', type: 'warm', value: 2 },
-            { text: '직감과 속도', type: 'spark', value: 2 },
-            { text: '사람들의 반응', type: 'flow', value: 2 }
-        ]
+        id: 'japan',
+        name: '일본식 묘지',
+        mood: '질서정연한 석등과 돌비석',
+        materials: '화산석, 이끼',
+        location: '일본 브룸',
+        image: 'https://live.staticflickr.com/3145/2747277093_61a010d970.jpg',
+        credit: 'tm-tm · CC BY-SA',
+        creditUrl: 'https://www.flickr.com/photos/52942259@N00/2747277093'
     },
     {
-        question: '다른 사람이 나에게 가장 자주 하는 말은?',
-        visual: buildVisual({
-            title: 'Echo',
-            nodes: [
-                { x: 80, y: 110 }, { x: 160, y: 70 }, { x: 240, y: 110 },
-                { x: 320, y: 70 }, { x: 400, y: 110 }
-            ]
-        }),
-        answers: [
-            { text: '믿음직하고 안정적이다', type: 'calm', value: 2 },
-            { text: '포근하고 배려심이 있다', type: 'warm', value: 2 },
-            { text: '에너지 넘치고 밝다', type: 'spark', value: 2 },
-            { text: '사람을 편하게 한다', type: 'flow', value: 2 }
-        ]
+        id: 'mexico',
+        name: '멕시코 색채 묘지',
+        mood: '화려한 색과 축제의 기억',
+        materials: '채색 석재, 꽃 장식',
+        location: '멕시코 축일',
+        image: 'https://live.staticflickr.com/4153/5437509886_7c277612f0.jpg',
+        credit: 'wallygrom · CC BY-SA',
+        creditUrl: 'https://www.flickr.com/photos/33037982@N04/5437509886'
     },
     {
-        question: '내가 요즘 원하는 관계의 온도는?',
-        visual: buildVisual({
-            title: 'Connection',
-            arcs: true
-        }),
-        answers: [
-            { text: '적당한 거리감이 있는 관계', type: 'calm', value: 2 },
-            { text: '자주 챙기는 따뜻한 관계', type: 'warm', value: 2 },
-            { text: '새로운 만남이 많은 관계', type: 'spark', value: 2 },
-            { text: '깊이 있는 대화를 나누는 관계', type: 'flow', value: 2 }
-        ]
+        id: 'neworleans',
+        name: '뉴올리언스 묘지',
+        mood: '지상 위로 솟은 석실',
+        materials: '석회암, 철제 장식',
+        location: '미국 루이지애나',
+        image: 'https://live.staticflickr.com/1437/5183363938_f799bdc9b8_b.jpg',
+        credit: 'Loco Steve · CC BY',
+        creditUrl: 'https://www.flickr.com/photos/36989019@N08/5183363938'
+    },
+    {
+        id: 'nordic',
+        name: '북유럽 숲묘지',
+        mood: '침묵을 담은 소나무 길',
+        materials: '목재, 석재',
+        location: '스웨덴 스톡홀름',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/0/0d/Skogskyrkogarden-night-2007-11-03.JPG',
+        credit: 'BloodIce · CC BY-SA',
+        creditUrl: 'https://commons.wikimedia.org/w/index.php?curid=3364285'
+    },
+    {
+        id: 'islamic',
+        name: '이슬람 묘지',
+        mood: '단정한 비석과 넓은 하늘',
+        materials: '백색 석재',
+        location: '중국 닝샤',
+        image: 'https://upload.wikimedia.org/wikipedia/commons/2/27/Lingshan_Islamic_Cemetery_-_city_view_-_DSCF8486.JPG',
+        credit: 'Vmenkov · CC BY-SA',
+        creditUrl: 'https://commons.wikimedia.org/w/index.php?curid=18786636'
+    },
+    {
+        id: 'jewish',
+        name: '유대인 묘지',
+        mood: '오래된 석비와 시간의 결',
+        materials: '석회암, 조각',
+        location: '체코 프라하',
+        image: 'https://live.staticflickr.com/3878/32978987236_860383eb04_b.jpg',
+        credit: 'archer10 · CC BY-SA',
+        creditUrl: 'https://www.flickr.com/photos/22490717@N02/32978987236'
+    },
+    {
+        id: 'italy',
+        name: '이탈리아 기념묘지',
+        mood: '조각과 회랑의 장엄함',
+        materials: '대리석, 조각상',
+        location: '피사 캄포산토',
+        image: 'https://live.staticflickr.com/8751/16813099494_bdfb1fa36f_b.jpg',
+        credit: 'Bernd Thaller · CC BY',
+        creditUrl: 'https://www.flickr.com/photos/44296132@N06/16813099494'
+    },
+    {
+        id: 'korea',
+        name: '한국 추모공원',
+        mood: '정갈한 추모 공간과 태극기',
+        materials: '화강암, 잔디',
+        location: '대한민국 현충원',
+        image: 'https://live.staticflickr.com/2921/14193907450_637337f15d_b.jpg',
+        credit: 'KOREA.NET · CC BY-SA',
+        creditUrl: 'https://www.flickr.com/photos/42438955@N05/14193907450'
     }
 ];
 
-startButton.addEventListener('click', startGame);
-nextButton.addEventListener('click', () => {
-    currentQuestionIndex++;
-    setNextQuestion();
-});
-restartButton.addEventListener('click', startGame);
-weatherRefreshButton.addEventListener('click', () => {
-    fetchWeather();
-});
+function updatePreview() {
+    const nameValue = nameInput.value.trim() || '이름을 남겨주세요';
+    const birthValue = birthInput.value.trim() || 'YYYY';
+    const deathValue = deathInput.value.trim() || 'YYYY';
+    const taglineValue = taglineInput.value.trim() || '한 줄 요약을 남겨주세요';
+    const epitaphValue = epitaphInput.value.trim() || '마지막 한 문장을 천천히 써 내려가세요.';
+    const toneValue = getSelectedTone();
+    const audienceValue = audienceInput.value;
 
-fetchWeather();
+    previewName.textContent = nameValue;
+    previewDates.textContent = `${birthValue} — ${deathValue}`;
+    previewEpitaph.textContent = epitaphValue;
+    previewTone.textContent = toneValue;
 
-function startGame() {
-    score = 0;
-    resultScores = { calm: 0, warm: 0, spark: 0, flow: 0 };
-    welcomeContainer.style.display = 'none';
-    resultsContainer.style.display = 'none';
-    quizContainer.style.display = 'block';
-    shuffledQuestions = questions.sort(() => Math.random() - 0.5);
-    currentQuestionIndex = 0;
-    setNextQuestion();
+    previewNameLg.textContent = nameValue;
+    previewDatesLg.textContent = `${birthValue} — ${deathValue}`;
+    previewTagline.textContent = taglineValue;
+    previewEpitaphLg.textContent = epitaphValue;
+    previewToneLg.textContent = toneValue;
+    previewAudience.textContent = audienceValue;
 }
 
-function setNextQuestion() {
-    resetState();
-    if (currentQuestionIndex < shuffledQuestions.length) {
-        showQuestion(shuffledQuestions[currentQuestionIndex]);
-    } else {
-        showResults();
+function getSelectedTone() {
+    const tone = document.querySelector('input[name="tone"]:checked');
+    return tone ? tone.value : '담담한';
+}
+
+function updateCounter() {
+    countNow.textContent = epitaphInput.value.length.toString();
+}
+
+function randomLine() {
+    const allLines = Object.values(tones).flat();
+    const choice = allLines[Math.floor(Math.random() * allLines.length)];
+    epitaphInput.value = choice;
+    updateCounter();
+    updatePreview();
+}
+
+function composeDraft() {
+    const toneValue = getSelectedTone();
+    const pool = tones[toneValue] || tones['담담한'];
+    const taglineValue = taglineInput.value.trim();
+    const audienceValue = audienceInput.value;
+    const nameValue = nameInput.value.trim();
+    const base = pool[Math.floor(Math.random() * pool.length)];
+    const additions = [];
+
+    if (taglineValue) {
+        additions.push(taglineValue);
     }
-}
-
-function showQuestion(question) {
-    questionElement.innerText = question.question;
-    updateProgress();
-    updateNextLabel();
-    renderVisual(question.visual);
-    question.answers.forEach(answer => {
-        const button = document.createElement('button');
-        button.innerText = answer.text;
-        button.classList.add('answer-btn');
-        button.dataset.type = answer.type;
-        button.dataset.value = answer.value;
-        button.addEventListener('click', selectAnswer);
-        answerButtonsElement.appendChild(button);
-    });
-}
-
-function resetState() {
-    nextButton.style.display = 'block';
-    nextButton.disabled = true;
-    questionVisualElement.innerHTML = '';
-    while (answerButtonsElement.firstChild) {
-        answerButtonsElement.removeChild(answerButtonsElement.firstChild);
+    if (audienceValue !== '모두에게') {
+        additions.push(`${audienceValue} 기억을 곁에 둡니다.`);
     }
-}
-
-function selectAnswer(e) {
-    const selectedButton = e.target;
-    const selectedType = selectedButton.dataset.type;
-    const selectedValue = Number(selectedButton.dataset.value) || 0;
-    if (selectedType) {
-        resultScores[selectedType] += selectedValue;
-        score += selectedValue;
+    if (nameValue) {
+        additions.push(`${nameValue}의 시간은 여기서 빛납니다.`);
     }
-    Array.from(answerButtonsElement.children).forEach(button => {
-        button.classList.remove('selected');
-        button.disabled = true;
-    });
-    selectedButton.classList.add('selected');
-    nextButton.disabled = false;
+
+    const draft = [base, ...additions].join(' ');
+    epitaphInput.value = draft.slice(0, 120);
+    updateCounter();
+    updatePreview();
 }
 
-
-function showResults() {
-    quizContainer.style.display = 'none';
-    resultsContainer.style.display = 'block';
-    const total = questions.length * 2;
-    const percent = Math.round((score / total) * 100);
-    scoreElement.innerText = `총 점수 ${score} / ${total} (${percent}%)`;
-    const result = getResultType();
-    resultTitleElement.innerText = result.title;
-    interpretationElement.innerText = result.description;
-    resultTraitsElement.innerHTML = result.traits.map(trait => `<li>${trait}</li>`).join('');
+function setPreviewStyle(style) {
+    selectedStyle = style;
+    previewStyle.textContent = style.name;
+    previewCard.style.backgroundImage = `linear-gradient(160deg, rgba(249, 245, 241, 0.9), rgba(231, 221, 209, 0.75)), url('${style.image}')`;
+    previewHeroCard.style.backgroundImage = `linear-gradient(140deg, rgba(253, 249, 245, 0.9), rgba(240, 232, 223, 0.8)), url('${style.image}')`;
 }
 
-function updateProgress() {
-    const total = shuffledQuestions.length;
-    const current = currentQuestionIndex + 1;
-    progressTextElement.innerText = `문항 ${current} / ${total}`;
-    progressBarElement.style.width = `${Math.round((current / total) * 100)}%`;
-}
+function buildCemeteryCard(style, index) {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'cemetery-card';
+    card.style.animationDelay = `${0.05 * index}s`;
+    card.innerHTML = `
+        <div class="cemetery-image" style="background-image: url('${style.image}')"></div>
+        <span class="cemetery-chip">${style.location}</span>
+        <div>
+            <p class="cemetery-title">${style.name}</p>
+            <p class="cemetery-desc">${style.mood}</p>
+        </div>
+        <p class="cemetery-meta">재료: ${style.materials}</p>
+        <a class="cemetery-credit" href="${style.creditUrl}" target="_blank" rel="noopener noreferrer">사진: ${style.credit}</a>
+    `;
 
-function updateNextLabel() {
-    const isLast = currentQuestionIndex === shuffledQuestions.length - 1;
-    nextButton.innerText = isLast ? '결과 보기' : '다음 문항';
-}
-
-function renderVisual(svgMarkup) {
-    if (!svgMarkup) {
-        questionVisualElement.innerHTML = '';
-        return;
-    }
-    questionVisualElement.innerHTML = svgMarkup;
-}
-
-function getResultType() {
-    const entries = Object.entries(resultScores);
-    entries.sort((a, b) => b[1] - a[1]);
-    const top = entries[0]?.[0] || 'calm';
-    const catalog = {
-        calm: {
-            title: '차분한 온기형',
-            description: '감정을 정리하며 안정적으로 에너지를 회복하는 타입입니다.',
-            traits: ['혼자만의 리셋 시간이 필요함', '정리된 환경에서 컨디션 상승', '결정을 신중하게 내림']
-        },
-        warm: {
-            title: '따뜻한 공감형',
-            description: '사람의 기분을 부드럽게 올려 주는 따뜻한 에너지가 강합니다.',
-            traits: ['다정한 말투가 기본값', '주변을 자연스럽게 챙김', '감정의 온도를 잘 읽음']
-        },
-        spark: {
-            title: '반짝 자극형',
-            description: '새로운 자극을 통해 에너지를 끌어올리는 타입입니다.',
-            traits: ['변화를 빠르게 수용', '즉흥적인 활력이 강함', '아이디어 전환이 빠름']
-        },
-        flow: {
-            title: '유연한 교류형',
-            description: '대화와 교류를 통해 컨디션을 회복하는 타입입니다.',
-            traits: ['공감형 대화에 강함', '사람들과 있을 때 컨디션 상승', '관계 속 균형을 잘 맞춤']
-        }
-    };
-    return catalog[top] || catalog.calm;
-}
-
-function fetchWeather() {
-    if (!navigator.geolocation) {
-        weatherStatusElement.innerText = '브라우저에서 위치 정보를 지원하지 않습니다.';
-        return;
-    }
-    weatherStatusElement.innerText = '현재 위치에서 날씨를 가져오는 중...';
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const { latitude, longitude } = position.coords;
-            loadWeather(latitude, longitude);
-        },
-        () => {
-            weatherStatusElement.innerText = '위치 권한이 필요합니다.';
-        },
-        { timeout: 8000 }
-    );
-}
-
-function loadWeather(latitude, longitude) {
-    const params = new URLSearchParams({
-        latitude: latitude.toFixed(4),
-        longitude: longitude.toFixed(4),
-        current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m',
-        timezone: 'auto'
-    });
-    const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
-
-    fetch(url)
-        .then((response) => response.json())
-        .then((data) => {
-            if (!data?.current) {
-                throw new Error('no-data');
-            }
-            const current = data.current;
-            const temp = Math.round(current.temperature_2m);
-            const feels = Math.round(current.apparent_temperature);
-            const humidity = Math.round(current.relative_humidity_2m);
-            const wind = Math.round(current.wind_speed_10m);
-            const summary = weatherCodeMap[current.weather_code] || '날씨 정보';
-            weatherStatusElement.innerText = '현재 날씨';
-            weatherTempElement.innerText = `${temp}°`;
-            weatherSummaryElement.innerText = summary;
-            weatherFeelsElement.innerText = `${feels}°`;
-            weatherHumidityElement.innerText = `${humidity}%`;
-            weatherWindElement.innerText = `${wind} m/s`;
-        })
-        .catch(() => {
-            weatherStatusElement.innerText = '날씨 정보를 불러오지 못했습니다.';
+    card.addEventListener('click', () => {
+        document.querySelectorAll('.cemetery-card').forEach((item) => {
+            item.classList.remove('active');
         });
+        card.classList.add('active');
+        setPreviewStyle(style);
+    });
+
+    return card;
 }
 
-function buildVisual(config) {
-    const header = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 180" aria-hidden="true">`;
-    const footer = '</svg>';
-    const background = `<rect width="520" height="180" rx="22" fill="rgba(255,255,255,0.6)" stroke="rgba(29,27,22,0.08)" />`;
-    const title = `<text x="24" y="32" font-size="12" fill="rgba(29,27,22,0.45)" font-family="Gowun Dodum, sans-serif">${config.title}</text>`;
-
-    if (config.waves) {
-        const waves = `
-            <path d="M40 110c40-30 90-30 130 0 40 30 90 30 130 0 40-30 90-30 130 0" fill="none" stroke="rgba(255,138,91,0.6)" stroke-width="6" stroke-linecap="round"/>
-            <path d="M70 140c30-20 70-20 100 0 30 20 70 20 100 0 30-20 70-20 100 0" fill="none" stroke="rgba(111,123,247,0.5)" stroke-width="5" stroke-linecap="round"/>
-        `;
-        return `${header}${background}${title}${waves}${footer}`;
-    }
-
-    if (config.orbits) {
-        const orbits = `
-            <circle cx="180" cy="110" r="48" fill="none" stroke="rgba(111,123,247,0.5)" stroke-width="4"/>
-            <circle cx="300" cy="90" r="30" fill="none" stroke="rgba(255,138,91,0.55)" stroke-width="4"/>
-            <circle cx="380" cy="120" r="22" fill="rgba(255,138,91,0.2)"/>
-        `;
-        return `${header}${background}${title}${orbits}${footer}`;
-    }
-
-    if (config.steps) {
-        const steps = `
-            <rect x="90" y="110" width="70" height="30" rx="10" fill="rgba(255,138,91,0.6)"/>
-            <rect x="180" y="90" width="70" height="50" rx="10" fill="rgba(111,123,247,0.5)"/>
-            <rect x="270" y="70" width="70" height="70" rx="10" fill="rgba(255,138,91,0.45)"/>
-            <rect x="360" y="55" width="70" height="85" rx="10" fill="rgba(111,123,247,0.4)"/>
-        `;
-        return `${header}${background}${title}${steps}${footer}`;
-    }
-
-    if (config.horizon) {
-        const horizon = `
-            <circle cx="120" cy="90" r="36" fill="rgba(255,138,91,0.4)"/>
-            <rect x="60" y="110" width="400" height="40" rx="20" fill="rgba(111,123,247,0.25)"/>
-            <path d="M80 135h360" stroke="rgba(22,26,34,0.25)" stroke-width="4" stroke-linecap="round"/>
-        `;
-        return `${header}${background}${title}${horizon}${footer}`;
-    }
-
-    if (config.balance) {
-        const balance = `
-            <rect x="250" y="60" width="20" height="80" rx="8" fill="rgba(22,26,34,0.3)"/>
-            <path d="M150 90h220" stroke="rgba(22,26,34,0.3)" stroke-width="6" stroke-linecap="round"/>
-            <circle cx="170" cy="110" r="24" fill="rgba(111,123,247,0.45)"/>
-            <circle cx="350" cy="110" r="24" fill="rgba(255,138,91,0.45)"/>
-        `;
-        return `${header}${background}${title}${balance}${footer}`;
-    }
-
-    if (config.arcs) {
-        const arcs = `
-            <path d="M100 130c50-60 130-60 180 0" fill="none" stroke="rgba(255,138,91,0.55)" stroke-width="6" stroke-linecap="round"/>
-            <path d="M200 130c40-50 100-50 140 0" fill="none" stroke="rgba(111,123,247,0.5)" stroke-width="6" stroke-linecap="round"/>
-            <circle cx="140" cy="105" r="10" fill="rgba(111,123,247,0.6)"/>
-            <circle cx="320" cy="105" r="10" fill="rgba(255,138,91,0.6)"/>
-        `;
-        return `${header}${background}${title}${arcs}${footer}`;
-    }
-
-    if (config.nodes) {
-        const points = config.nodes
-            .map(node => `<circle cx="${node.x}" cy="${node.y}" r="10" fill="rgba(255,138,91,0.7)" />`)
-            .join('');
-        const lines = config.nodes
-            .slice(0, -1)
-            .map((node, index) => {
-                const next = config.nodes[index + 1];
-                return `<line x1="${node.x}" y1="${node.y}" x2="${next.x}" y2="${next.y}" stroke="rgba(111,123,247,0.6)" stroke-width="3" />`;
-            })
-            .join('');
-        return `${header}${background}${title}${lines}${points}${footer}`;
-    }
-
-    if (config.bars) {
-        const bars = config.bars
-            .map((height, index) => {
-                const x = 70 + index * 60;
-                const y = 150 - height;
-                return `<rect x="${x}" y="${y}" width="30" height="${height}" rx="6" fill="rgba(111,123,247,0.65)" />`;
-            })
-            .join('');
-        return `${header}${background}${title}${bars}${footer}`;
-    }
-
-    if (config.shapes) {
-        const shapes = config.shapes
-            .map((shape, index) => {
-                const x = 90 + index * 80;
-                if (shape === 'triangle') {
-                    return `<polygon points="${x},70 ${x - 18},110 ${x + 18},110" fill="rgba(255,138,91,0.7)" />`;
-                }
-                if (shape === 'square') {
-                    return `<rect x="${x - 18}" y="78" width="36" height="36" rx="6" fill="rgba(111,123,247,0.7)" />`;
-                }
-                return '';
-            })
-            .join('');
-        return `${header}${background}${title}${shapes}${footer}`;
-    }
-
-    if (config.dots) {
-        const dots = Array.from({ length: config.dots }).map((_, index) => {
-            const x = 120 + (index % 3) * 90;
-            const y = 80 + Math.floor(index / 3) * 40;
-            return `<circle cx="${x}" cy="${y}" r="10" fill="rgba(255,138,91,0.6)" />`;
-        }).join('');
-        return `${header}${background}${title}${dots}${footer}`;
-    }
-
-    if (config.rings) {
-        const rings = config.rings
-            .map((r, index) => `<circle cx="${160 + index * 80}" cy="110" r="${r}" fill="none" stroke="rgba(111,123,247,0.5)" stroke-width="4" />`)
-            .join('');
-        return `${header}${background}${title}${rings}${footer}`;
-    }
-
-    if (config.arrows) {
-        const arrows = `
-            <path d="M120 110h120" stroke="rgba(29,27,22,0.35)" stroke-width="4" stroke-linecap="round"/>
-            <path d="M210 100l30 10-30 10" fill="none" stroke="rgba(29,27,22,0.35)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M400 110h-120" stroke="rgba(29,27,22,0.35)" stroke-width="4" stroke-linecap="round"/>
-            <path d="M310 100l-30 10 30 10" fill="none" stroke="rgba(29,27,22,0.35)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-        `;
-        return `${header}${background}${title}${arrows}${footer}`;
-    }
-
-    return `${header}${background}${title}${footer}`;
+function renderCemeteryStyles() {
+    cemeteryGrid.innerHTML = '';
+    cemeteryStyles.forEach((style, index) => {
+        const card = buildCemeteryCard(style, index);
+        if (style.id === preferredStyleId || (!preferredStyleId && index === 0)) {
+            card.classList.add('active');
+            setPreviewStyle(style);
+        }
+        cemeteryGrid.appendChild(card);
+    });
 }
+
+function saveDraft() {
+    const draft = {
+        name: nameInput.value.trim(),
+        birth: birthInput.value.trim(),
+        death: deathInput.value.trim(),
+        tagline: taglineInput.value.trim(),
+        epitaph: epitaphInput.value.trim(),
+        tone: getSelectedTone(),
+        audience: audienceInput.value,
+        styleId: selectedStyle ? selectedStyle.id : null
+    };
+    localStorage.setItem('lastWhisperDraft', JSON.stringify(draft));
+    saveButton.textContent = '저장됨';
+    setTimeout(() => {
+        saveButton.textContent = '초안 저장';
+    }, 1600);
+}
+
+function loadDraft() {
+    const draft = localStorage.getItem('lastWhisperDraft');
+    if (!draft) {
+        return;
+    }
+    const data = JSON.parse(draft);
+    nameInput.value = data.name || '';
+    birthInput.value = data.birth || '';
+    deathInput.value = data.death || '';
+    taglineInput.value = data.tagline || '';
+    epitaphInput.value = data.epitaph || '';
+    audienceInput.value = data.audience || '모두에게';
+    preferredStyleId = data.styleId || null;
+
+    const toneRadio = document.querySelector(`input[name="tone"][value="${data.tone}"]`);
+    if (toneRadio) {
+        toneRadio.checked = true;
+    }
+    updateCounter();
+    updatePreview();
+}
+
+function getScore(item) {
+    const likes = item.likes || 0;
+    const dislikes = item.dislikes || 0;
+    return likes - dislikes;
+}
+
+function formatDate(timestamp) {
+    if (!timestamp) {
+        return '방금 전';
+    }
+    const date = new Date(timestamp);
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function renderInspiration(items) {
+    inspirationList.innerHTML = '';
+    if (!items.length) {
+        inspirationList.innerHTML = '<p class="inspiration-meta">아직 공유된 문장이 없습니다. 첫 문장을 남겨주세요.</p>';
+        return;
+    }
+    const votes = JSON.parse(localStorage.getItem(voteStorageKey) || '{}');
+    items.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'inspiration-card';
+        const userVote = votes[item.id];
+        const rankLabel = index < 3 ? `Top ${index + 1}` : `Rank ${index + 1}`;
+        const rank = document.createElement('span');
+        rank.className = 'inspiration-rank';
+        rank.textContent = rankLabel;
+
+        const text = document.createElement('p');
+        text.className = 'inspiration-text';
+        text.textContent = item.text;
+
+        const tags = document.createElement('div');
+        tags.className = 'inspiration-tags';
+        const tone = document.createElement('span');
+        tone.textContent = item.tone || '담담한';
+        const style = document.createElement('span');
+        style.textContent = item.style || '묘지 선택 없음';
+        tags.append(tone, style);
+
+        const actions = document.createElement('div');
+        actions.className = 'inspiration-actions';
+        const likeButton = document.createElement('button');
+        likeButton.className = `reaction-btn ${userVote === 'like' ? 'active' : ''}`;
+        likeButton.dataset.id = item.id;
+        likeButton.dataset.type = 'like';
+        likeButton.textContent = `좋아요 ${item.likes || 0}`;
+        const dislikeButton = document.createElement('button');
+        dislikeButton.className = `reaction-btn ${userVote === 'dislike' ? 'active' : ''}`;
+        dislikeButton.dataset.id = item.id;
+        dislikeButton.dataset.type = 'dislike';
+        dislikeButton.textContent = `싫어요 ${item.dislikes || 0}`;
+        actions.append(likeButton, dislikeButton);
+
+        const meta = document.createElement('p');
+        meta.className = 'inspiration-meta';
+        meta.textContent = `${formatDate(item.createdAt)} · 점수 ${getScore(item)}`;
+
+        card.append(rank, text, tags, actions, meta);
+        inspirationList.appendChild(card);
+    });
+}
+
+async function fetchEpitaphs() {
+    if (!backendEnabled) {
+        backendNote.textContent = 'main.js의 FIREBASE_DB_URL을 설정하면 공유 랭킹이 활성화됩니다.';
+        inspirationList.innerHTML = '<p class="inspiration-meta">백엔드 연결이 필요합니다.</p>';
+        return;
+    }
+    backendNote.textContent = '';
+    inspirationList.innerHTML = '<p class="inspiration-meta">문장을 불러오는 중입니다.</p>';
+    try {
+        const response = await fetch(`${FIREBASE_DB_URL}/epitaphs.json`);
+        const data = await response.json();
+        if (!data) {
+            currentEpitaphs = {};
+            renderInspiration([]);
+            return;
+        }
+        const items = Object.entries(data).map(([id, item]) => ({ id, ...item }));
+        items.sort((a, b) => {
+            const scoreDiff = getScore(b) - getScore(a);
+            if (scoreDiff !== 0) {
+                return scoreDiff;
+            }
+            return (b.createdAt || 0) - (a.createdAt || 0);
+        });
+        currentEpitaphs = items.reduce((acc, item) => {
+            acc[item.id] = item;
+            return acc;
+        }, {});
+        renderInspiration(items);
+    } catch (error) {
+        inspirationList.innerHTML = '<p class="inspiration-meta">불러오기에 실패했습니다. 잠시 후 다시 시도해 주세요.</p>';
+    }
+}
+
+async function shareEpitaph() {
+    if (!backendEnabled) {
+        backendNote.textContent = 'main.js의 FIREBASE_DB_URL을 먼저 입력해 주세요.';
+        return;
+    }
+    const text = epitaphInput.value.trim();
+    if (!text) {
+        alert('공유할 묘비명이 필요합니다. 먼저 한 줄을 작성해 주세요.');
+        return;
+    }
+    const payload = {
+        text,
+        tone: getSelectedTone(),
+        style: selectedStyle ? selectedStyle.name : '',
+        likes: 0,
+        dislikes: 0,
+        createdAt: Date.now()
+    };
+    shareEpitaphButton.textContent = '공유 중...';
+    try {
+        await fetch(`${FIREBASE_DB_URL}/epitaphs.json`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        shareEpitaphButton.textContent = '공유됨';
+        setTimeout(() => {
+            shareEpitaphButton.textContent = '현재 문장 공유';
+        }, 1400);
+        fetchEpitaphs();
+    } catch (error) {
+        shareEpitaphButton.textContent = '공유 실패';
+    }
+}
+
+async function voteOnEpitaph(id, reaction) {
+    if (!backendEnabled) {
+        return;
+    }
+    const entry = currentEpitaphs[id];
+    if (!entry) {
+        return;
+    }
+    const votes = JSON.parse(localStorage.getItem(voteStorageKey) || '{}');
+    const previous = votes[id];
+    if (previous === reaction) {
+        return;
+    }
+    let likes = entry.likes || 0;
+    let dislikes = entry.dislikes || 0;
+    if (previous === 'like') {
+        likes = Math.max(0, likes - 1);
+    }
+    if (previous === 'dislike') {
+        dislikes = Math.max(0, dislikes - 1);
+    }
+    if (reaction === 'like') {
+        likes += 1;
+    } else {
+        dislikes += 1;
+    }
+
+    try {
+        await fetch(`${FIREBASE_DB_URL}/epitaphs/${id}.json`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ likes, dislikes })
+        });
+        votes[id] = reaction;
+        localStorage.setItem(voteStorageKey, JSON.stringify(votes));
+        fetchEpitaphs();
+    } catch (error) {
+        // ignore
+    }
+}
+
+function init() {
+    loadDraft();
+    renderCemeteryStyles();
+    updateCounter();
+    updatePreview();
+    fetchEpitaphs();
+}
+
+[nameInput, birthInput, deathInput, taglineInput, epitaphInput, audienceInput].forEach((input) => {
+    input.addEventListener('input', () => {
+        updateCounter();
+        updatePreview();
+    });
+});
+
+document.querySelectorAll('input[name="tone"]').forEach((radio) => {
+    radio.addEventListener('change', updatePreview);
+});
+
+randomButton.addEventListener('click', randomLine);
+composeButton.addEventListener('click', composeDraft);
+saveButton.addEventListener('click', saveDraft);
+refreshEpitaphsButton.addEventListener('click', fetchEpitaphs);
+shareEpitaphButton.addEventListener('click', shareEpitaph);
+
+inspirationList.addEventListener('click', (event) => {
+    const button = event.target.closest('.reaction-btn');
+    if (!button) {
+        return;
+    }
+    voteOnEpitaph(button.dataset.id, button.dataset.type);
+});
+
+startComposeButton.addEventListener('click', () => {
+    document.getElementById('composer').scrollIntoView({ behavior: 'smooth' });
+});
+
+startDesignButton.addEventListener('click', () => {
+    document.getElementById('cemetery').scrollIntoView({ behavior: 'smooth' });
+});
+
+init();
